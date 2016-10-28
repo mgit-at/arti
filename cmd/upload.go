@@ -17,6 +17,8 @@ package cmd
 import (
 	"log"
 
+	"github.com/mgit-at/arti/store"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -38,6 +40,11 @@ var uploadCmd = &cobra.Command{
 		}
 		log.Printf("stores: %v\n", storeNames)
 
+		s, err := store.NewStore(stores.Sub("minio"))
+		if err != nil {
+			log.Fatalln("unable to initialize store:", err)
+		}
+		log.Printf("using store(type: %T): %v", s, s)
 	},
 }
 

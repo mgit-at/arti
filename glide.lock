@@ -1,6 +1,8 @@
 hash: ef45aef890e28ae9ba2b1ae01457ed5c77a90710583bc6f265584d902e583c28
-updated: 2016-10-28T15:15:32.796837976+02:00
+updated: 2016-10-28T17:47:47.546755705+02:00
 imports:
+- name: github.com/blang/semver
+  version: 60ec3488bfea7cca02b021d106d9911120d25fe9
 - name: github.com/fsnotify/fsnotify
   version: fd9ec7deca8bf46ecd2a795baaacf2b3a9be1197
 - name: github.com/hashicorp/hcl
