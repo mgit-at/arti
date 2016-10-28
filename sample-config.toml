@@ -1,0 +1,16 @@
+[stores]
+
+  [stores.minio]
+  type = "S3"
+  version = 4
+  endpoint = "127.0.0.1:9000"
+  accessKey = "1234567890"
+  secretAccessKey = "abcdefghijklmnopqrstuvwxyz"
+  location = "us-east-1"
+
+  [stores.gcs]
+  type = "S3"
+  version = 2
+  endpoint = "https://storage.googleapis.com"
+  accessKey = "helloworld"
+  secretAccessKey = "very-very-secret-dont-tell-anyone"

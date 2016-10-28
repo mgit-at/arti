@@ -15,19 +15,29 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-// uploadCmd represents the upload command
 var uploadCmd = &cobra.Command{
 	Use:   "upload",
 	Short: "upload files to the store",
 	Long:  `...tba...`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: Work your own magic here
-		fmt.Println("Error: uploading not yet implemented!")
+
+		stores := viper.Sub("stores")
+		if stores == nil {
+			log.Fatal("no stores specified!")
+		}
+
+		storeNames := []string{}
+		for s := range stores.AllSettings() {
+			storeNames = append(storeNames, s)
+		}
+		log.Printf("stores: %v\n", storeNames)
+
 	},
 }
 

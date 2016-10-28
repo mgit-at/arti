@@ -15,19 +15,17 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 )
 
-// lsCmd represents the ls command
 var lsCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "list all files on the store",
 	Long:  `...tba...`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: Work your own magic here
-		fmt.Println("Error: listing is not yet implemented!")
+		log.Println("Error: listing is not yet implemented!")
 	},
 }
 
