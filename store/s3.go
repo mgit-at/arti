@@ -15,15 +15,48 @@
 package store
 
 import (
+	"fmt"
+
+	"github.com/minio/minio-go"
 	"github.com/spf13/viper"
 )
 
 type S3Store struct {
+	endpoint        string
+	accessKeyID     string
+	secretAccessKey string
+	useSSL          bool
+	version         int
+	location        string
+
+	client *minio.Client
 }
 
 func NewS3Store(cfg *viper.Viper) (Store, error) {
 	s := &S3Store{}
-	// TODO: use cfg
+	s.endpoint = cfg.GetString("endpoint")
+	s.accessKeyID = cfg.GetString("access-key-id")
+	s.secretAccessKey = cfg.GetString("secret-access-key")
+	s.useSSL = !cfg.GetBool("nossl")
+	s.version = cfg.GetInt("version")
+	s.location = cfg.GetString("location")
+
+	var err error
+	switch s.version {
+	case 2:
+		s.client, err = minio.NewV2(s.endpoint, s.accessKeyID, s.secretAccessKey, s.useSSL)
+	case 0:
+		fallthrough
+	case 4:
+		s.version = 4
+		s.client, err = minio.NewV4(s.endpoint, s.accessKeyID, s.secretAccessKey, s.useSSL)
+	default:
+		err = fmt.Errorf("invalid S3 protocol version %d (only 2 and 4 are supported)", s.version)
+	}
+	if err != nil {
+		return nil, err
+	}
+
 	return Store(s), nil
 }
 

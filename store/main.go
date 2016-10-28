@@ -38,12 +38,12 @@ type Store interface {
 }
 
 func NewStore(cfg *viper.Viper) (store Store, err error) {
-	t := strings.ToLower(cfg.GetString("type"))
-	switch t {
+	t := cfg.GetString("type")
+	switch strings.ToLower(t) {
 	case "s3":
 		store, err = NewS3Store(cfg)
 	default:
-		err = fmt.Errorf("unkown store type: %s", t)
+		err = fmt.Errorf("unknown store type: %s", t)
 	}
 	return
 }
