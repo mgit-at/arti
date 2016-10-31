@@ -17,6 +17,7 @@ package store
 import (
 	"fmt"
 	"log"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -24,6 +25,8 @@ import (
 	"github.com/minio/minio-go"
 	"github.com/spf13/viper"
 )
+
+const HASH_FILENAME = "sha256sum"
 
 var (
 	bucketNameRe = regexp.MustCompile("^[-_.A-Za-z0-9]{3,}$")
@@ -75,8 +78,32 @@ func NewS3Store(cfg *viper.Viper, path string) (Store, error) {
 	return Store(s), nil
 }
 
-func (s *S3Store) List() ([]Artifact, error) {
-	return nil, ErrNotImplemented
+func (s *S3Store) List() (list ArtifactList, err error) {
+	list = make(ArtifactList)
+
+	doneCh := make(chan struct{})
+	defer close(doneCh)
+
+	objCh := s.client.ListObjectsV2(s.bucket, "", true, doneCh)
+	for obj := range objCh {
+		if obj.Err != nil {
+			err = fmt.Errorf("Error while listing objects: %v", obj.Err)
+			return
+		}
+		nv, f := path.Split(obj.Key)
+		if f == HASH_FILENAME {
+			continue
+		}
+		n, v := path.Split(strings.TrimSuffix(nv, "/"))
+		n = strings.TrimSuffix(n, "/")
+		if a, err := MakeArtifactListEntry(v, f); err == nil {
+			list[n] = append(list[n], a)
+		} else {
+			log.Printf("ignoring invalid object: '%s'", obj.Key) // TODO: debug output
+		}
+	}
+
+	return
 }
 
 func (s *S3Store) MakeBucket() (err error) {
@@ -106,7 +133,7 @@ func (s *S3Store) Put(artifact Artifact, filename string) error {
 	if err != nil {
 		return fmt.Errorf("Error calculating SHA256 hash of '%s': %v", basename, err)
 	}
-	_, err = s.client.PutObject(s.bucket, path+"sha256sum", strings.NewReader(hashSum), "application/octet-stream")
+	_, err = s.client.PutObject(s.bucket, path+HASH_FILENAME, strings.NewReader(hashSum), "application/octet-stream")
 	if err != nil {
 		return fmt.Errorf("Error uploading file '%s': %v", basename, err)
 	}

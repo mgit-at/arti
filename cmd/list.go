@@ -52,7 +52,10 @@ func listRun(cmd *cobra.Command, args []string) {
 		log.Fatalln("listing artifacts failed:", err)
 	}
 
-	for _, a := range artifacts {
-		log.Printf("%s (%s)", a.Name, a.Version)
+	for name, versions := range artifacts {
+		log.Printf("%s:", name)
+		for _, v := range versions {
+			log.Printf("  %v: %s", v.Version, v.Filename)
+		}
 	}
 }
