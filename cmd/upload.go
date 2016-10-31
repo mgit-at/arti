@@ -24,10 +24,11 @@ import (
 )
 
 var uploadCmd = &cobra.Command{
-	Use:   "upload <store>/<path or bucket> <file>",
-	Short: "upload files to the store",
-	Long:  `...tba...`,
-	Run:   uploadRun,
+	Use:     "upload <store>/<path or bucket> <file>",
+	Aliases: []string{"put"},
+	Short:   "upload files to the store",
+	Long:    `...tba...`,
+	Run:     uploadRun,
 }
 
 var (
