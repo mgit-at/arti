@@ -1,12 +1,12 @@
 hash: ef45aef890e28ae9ba2b1ae01457ed5c77a90710583bc6f265584d902e583c28
-updated: 2016-10-28T17:58:21.816649137+02:00
+updated: 2016-10-31T11:05:48.963299635+01:00
 imports:
 - name: github.com/blang/semver
   version: 60ec3488bfea7cca02b021d106d9911120d25fe9
 - name: github.com/fsnotify/fsnotify
   version: fd9ec7deca8bf46ecd2a795baaacf2b3a9be1197
 - name: github.com/hashicorp/hcl
-  version: 99ce73d4fe576449f7a689d4fc2b2ad09a86bdaa
+  version: 8fa153c5b4e9d1ccecda7075821ffc7c1f6d912b
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -34,7 +34,7 @@ imports:
 - name: github.com/pelletier/go-toml
   version: 45932ad32dfdd20826f5671da37a5f3ce9f26a8d
 - name: github.com/pkg/errors
-  version: 839d9e913e063e28dfd0e6c7b7512793e0a48be9
+  version: 248dadf4e9068a0b3e79f02ed0a610d935de5302
 - name: github.com/pkg/sftp
   version: 4d0e916071f68db74f8a73926335f809396d6b42
 - name: github.com/spf13/afero
@@ -51,9 +51,9 @@ imports:
 - name: github.com/spf13/pflag
   version: 5ccb023bc27df288a957c5e994cd44fd19619465
 - name: github.com/spf13/viper
-  version: 80ab6657f9ec7e5761f6603320d3d58dfe6970f6
+  version: 651d9d916abc3c3d6a91a12549495caba5edffd2
 - name: golang.org/x/crypto
-  version: ca7e7f10cb9fd9c1a6ff7f60436c086d73714180
+  version: b2fa06b6af4b7c9bfeb8569ab7b17f04550717bf
   subpackages:
   - curve25519
   - ed25519
