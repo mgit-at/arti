@@ -21,7 +21,6 @@ import (
 
 	"github.com/mgit-at/arti/store"
 
-	"github.com/blang/semver"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -47,7 +46,7 @@ func init() {
 	uploadCmd.MarkFlagRequired("version")
 }
 
-func checkFlagsAndArgs(cmd *cobra.Command, args []string) (string, string, store.Artifact) {
+func checkFlagsAndArgs(cmd *cobra.Command, args []string) (string, string, *store.Artifact) {
 	if len(args) < 2 {
 		cmd.Help()
 		os.Exit(1)
@@ -63,12 +62,10 @@ func checkFlagsAndArgs(cmd *cobra.Command, args []string) (string, string, store
 		os.Exit(1)
 	}
 
-	a := store.Artifact{Name: artifactName}
-	v, err := semver.ParseTolerant(artifactVersion)
+	a, err := store.NewArtifact(artifactName, artifactVersion)
 	if err != nil {
-		log.Fatalln("invalid version:", err)
+		log.Fatalln("invalid artifact specification:", err)
 	}
-	a.Version = v
 
 	return args[0], args[1], a
 }
@@ -96,7 +93,7 @@ func uploadRun(cmd *cobra.Command, args []string) {
 
 	s := selectStore(snp)
 
-	if err := s.Put(a, fn); err != nil {
+	if err := s.Put(*a, fn); err != nil {
 		log.Fatalln("upload failed:", err)
 	}
 }
