@@ -64,6 +64,6 @@ func (s *S3Store) List() error {
 	return ErrNotImplemented
 }
 
-func (s *S3Store) Put(name, version, file string) error {
+func (s *S3Store) Put(artifact Artifact, file string) error {
 	return ErrNotImplemented
 }

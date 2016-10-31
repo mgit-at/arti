@@ -10,7 +10,7 @@
   [stores.gcs]
   type = "S3"
   version = 2
-  endpoint = "https://storage.googleapis.com"
+  endpoint = "storage.googleapis.com"
   access-key-id = "helloworld"
   secret-access-key = "very-very-secret-dont-tell-anyone"
   nossl = true

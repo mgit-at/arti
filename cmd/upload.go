@@ -16,49 +16,83 @@ package cmd
 
 import (
 	"log"
+	"os"
 
 	"github.com/mgit-at/arti/store"
 
+	"github.com/blang/semver"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var uploadCmd = &cobra.Command{
-	Use:   "upload",
+	Use:   "upload <store-name> <file>",
 	Short: "upload files to the store",
 	Long:  `...tba...`,
-	Run: func(cmd *cobra.Command, args []string) {
-
-		stores := viper.Sub("stores")
-		if stores == nil {
-			log.Fatal("no stores specified!")
-		}
-
-		storeNames := []string{}
-		for s := range stores.AllSettings() {
-			storeNames = append(storeNames, s)
-		}
-		log.Printf("stores: %v\n", storeNames)
-
-		s, err := store.NewStore(stores.Sub("minio"))
-		if err != nil {
-			log.Fatalln("unable to initialize store:", err)
-		}
-		log.Printf("using store(type: %T): %+v", s, s)
-	},
+	Run:   uploadRun,
 }
+
+var (
+	artifactName    string
+	artifactVersion string
+)
 
 func init() {
 	RootCmd.AddCommand(uploadCmd)
 
-	// Here you will define your flags and configuration settings.
+	uploadCmd.Flags().StringVarP(&artifactName, "name", "n", "", "the name of the artifact")
+	uploadCmd.MarkFlagRequired("name")
+	uploadCmd.Flags().StringVarP(&artifactVersion, "version", "v", "", "the version of the artifact (must adhere to the semantic versioning scheme)")
+	uploadCmd.MarkFlagRequired("version")
+}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// uploadCmd.PersistentFlags().String("foo", "", "A help for foo")
+func checkFlagsAndArgs(cmd *cobra.Command, args []string) (string, string, store.Artifact) {
+	if len(args) < 2 {
+		cmd.Help()
+		os.Exit(1)
+	}
+	if artifactName == "" {
+		log.Println("please specifiy the artefact name")
+		cmd.Help()
+		os.Exit(1)
+	}
+	if artifactVersion == "" {
+		log.Println("please specifiy the artefact version")
+		cmd.Help()
+		os.Exit(1)
+	}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// uploadCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	a := store.Artifact{Name: artifactName}
+	v, err := semver.ParseTolerant(artifactVersion)
+	if err != nil {
+		log.Fatalln("invalid version:", err)
+	}
+	a.Version = v
 
+	return args[0], args[1], a
+}
+
+func selectStore(name string) store.Store {
+	stores := viper.Sub("stores")
+	if stores == nil {
+		log.Fatal("no stores specified!")
+	}
+
+	s, err := store.NewStore(stores.Sub(name))
+	if err != nil {
+		log.Fatalln("unable to initialize store:", err)
+	}
+	log.Printf("using store(type: %T): %+v", s, s)
+	return s
+}
+
+func uploadRun(cmd *cobra.Command, args []string) {
+	sn, fn, a := checkFlagsAndArgs(cmd, args)
+
+	s := selectStore(sn)
+
+	// TODO: calculate checksum and upload it as well
+	if err := s.Put(a, fn); err != nil {
+		log.Fatalln("upload failed:", err)
+	}
 }

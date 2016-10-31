@@ -34,7 +34,7 @@ type Artifact struct {
 
 type Store interface {
 	List() error
-	Put(name, version, file string) error
+	Put(artifact Artifact, file string) error
 }
 
 func NewStore(cfg *viper.Viper) (store Store, err error) {
