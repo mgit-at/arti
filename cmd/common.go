@@ -38,7 +38,11 @@ func selectStore(nameAndPath string) store.Store {
 	if len(np) < 2 {
 		np = append(np, "")
 	}
-	s, err := store.NewStore(stores.Sub(np[0]), np[1])
+	cfg := stores.Sub(np[0])
+	if cfg == nil {
+		log.Fatalln("no such store:", np[0])
+	}
+	s, err := store.NewStore(cfg, np[1])
 	if err != nil {
 		log.Fatalln("unable to initialize store:", err)
 	}
