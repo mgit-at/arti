@@ -19,6 +19,7 @@ import (
 	"log"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/minio/minio-go"
 	"github.com/spf13/viper"
@@ -90,17 +91,28 @@ func (s *S3Store) MakeBucket() (err error) {
 	return
 }
 
-func (s *S3Store) Put(artifact Artifact, file string) error {
+func (s *S3Store) Put(artifact Artifact, filename string) error {
 	if err := s.MakeBucket(); err != nil {
 		return err
 	}
 
-	path := fmt.Sprintf("%s/%s/%s", artifact.Name, artifact.Version, filepath.Base(file))
-	n, err := s.client.FPutObject(s.bucket, path, file, "application/octet-stream")
+	basename := filepath.Base(filename)
+	path := fmt.Sprintf("%s/%s/", artifact.Name, artifact.Version)
+	n, err := s.client.FPutObject(s.bucket, path+basename, filename, "application/octet-stream")
 	if err != nil {
-		return err
+		return fmt.Errorf("Error uploading file '%s': %v", basename, err)
 	}
-	log.Printf("successfully uploaded %d Bytes to %s / %s", n, s.bucket, path)
+	hashSum, err := calcSHA256(filename)
+	if err != nil {
+		return fmt.Errorf("Error calculating SHA256 hash of '%s': %v", basename, err)
+	}
+	_, err = s.client.PutObject(s.bucket, path+"sha256sum", strings.NewReader(hashSum), "application/octet-stream")
+	if err != nil {
+		return fmt.Errorf("Error uploading file '%s': %v", basename, err)
+	}
+
+	log.Printf("successfully uploaded %d Bytes to '%s:/%s'", n, s.bucket, path)
+	log.Printf("SHA256: %s", hashSum)
 
 	return nil
 }

@@ -96,7 +96,6 @@ func uploadRun(cmd *cobra.Command, args []string) {
 
 	s := selectStore(snp)
 
-	// TODO: calculate checksum and upload it as well
 	if err := s.Put(a, fn); err != nil {
 		log.Fatalln("upload failed:", err)
 	}

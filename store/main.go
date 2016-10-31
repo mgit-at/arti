@@ -15,8 +15,12 @@
 package store
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
 	"errors"
 	"fmt"
+	"io"
+	"os"
 	"strings"
 
 	"github.com/blang/semver"
@@ -34,7 +38,23 @@ type Artifact struct {
 
 type Store interface {
 	List() error
-	Put(artifact Artifact, file string) error
+	Put(artifact Artifact, filename string) error
+}
+
+func calcSHA256(filename string) (string, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return "", fmt.Errorf("Error opening file: %v", err)
+	}
+	defer file.Close()
+
+	hash := sha256.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return "", err
+	}
+
+	var hashSum []byte
+	return base64.StdEncoding.EncodeToString(hash.Sum(hashSum)), nil
 }
 
 func NewStore(cfg *viper.Viper, path string) (store Store, err error) {
