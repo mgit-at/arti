@@ -47,7 +47,7 @@ func MakeArtifact(name, version string) (Artifact, error) {
 }
 
 type Store interface {
-	List() error
+	List() ([]Artifact, error)
 	Put(artifact Artifact, filename string) error
 }
 

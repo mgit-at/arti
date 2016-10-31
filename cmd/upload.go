@@ -24,7 +24,7 @@ import (
 )
 
 var uploadCmd = &cobra.Command{
-	Use:     "upload <store>/<path or bucket> <file>",
+	Use:     "upload <store>/<bucket> <file>",
 	Aliases: []string{"put"},
 	Short:   "upload files to the store",
 	Long:    `...tba...`,
@@ -45,7 +45,7 @@ func init() {
 	uploadCmd.MarkFlagRequired("version")
 }
 
-func checkFlagsAndArgs(cmd *cobra.Command, args []string) (string, string, store.Artifact) {
+func uploadCheckFlagsAndArgs(cmd *cobra.Command, args []string) (string, string, store.Artifact) {
 	if len(args) < 2 {
 		cmd.Help()
 		os.Exit(1)
@@ -70,7 +70,7 @@ func checkFlagsAndArgs(cmd *cobra.Command, args []string) (string, string, store
 }
 
 func uploadRun(cmd *cobra.Command, args []string) {
-	snp, fn, a := checkFlagsAndArgs(cmd, args)
+	snp, fn, a := uploadCheckFlagsAndArgs(cmd, args)
 
 	s := selectStore(snp)
 

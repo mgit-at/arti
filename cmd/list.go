@@ -16,31 +16,43 @@ package cmd
 
 import (
 	"log"
+	"os"
 
 	"github.com/spf13/cobra"
 )
 
 var listCmd = &cobra.Command{
-	Use:     "list",
+	Use:     "list <store>/<bucket>",
 	Aliases: []string{"ls"},
 	Short:   "list all files on the store",
 	Long:    `...tba...`,
-	Run: func(cmd *cobra.Command, args []string) {
-		log.Println("Error: listing is not yet implemented!")
-	},
+	Run:     listRun,
 }
 
 func init() {
 	RootCmd.AddCommand(listCmd)
+}
 
-	// Here you will define your flags and configuration settings.
+func listCheckFlagsAndArgs(cmd *cobra.Command, args []string) string {
+	if len(args) < 1 {
+		cmd.Help()
+		os.Exit(1)
+	}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
+	return args[0]
+}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+func listRun(cmd *cobra.Command, args []string) {
+	snp := listCheckFlagsAndArgs(cmd, args)
 
+	s := selectStore(snp)
+
+	artifacts, err := s.List()
+	if err != nil {
+		log.Fatalln("listing artifacts failed:", err)
+	}
+
+	for _, a := range artifacts {
+		log.Printf("%s (%s)", a.Name, a.Version)
+	}
 }

@@ -75,8 +75,8 @@ func NewS3Store(cfg *viper.Viper, path string) (Store, error) {
 	return Store(s), nil
 }
 
-func (s *S3Store) List() error {
-	return ErrNotImplemented
+func (s *S3Store) List() ([]Artifact, error) {
+	return nil, ErrNotImplemented
 }
 
 func (s *S3Store) MakeBucket() (err error) {
