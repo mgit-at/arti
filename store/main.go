@@ -85,6 +85,11 @@ func calcSHA256(filename string) (string, error) {
 	return base64.StdEncoding.EncodeToString(hash.Sum(hashSum)), nil
 }
 
+func checkSHA256(filename, toCompare string) (bool, error) {
+	hashSum, err := calcSHA256(filename)
+	return hashSum == toCompare, err
+}
+
 func NewStore(cfg *viper.Viper, path string) (store Store, err error) {
 	t := cfg.GetString("type")
 	switch strings.ToLower(t) {

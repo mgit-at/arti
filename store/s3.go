@@ -15,8 +15,11 @@
 package store
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"log"
+	"os"
 	"path"
 	"path/filepath"
 	"regexp"
@@ -135,7 +138,7 @@ func (s *S3Store) Put(artifact Artifact, filename string) error {
 	}
 	_, err = s.client.PutObject(s.bucket, p+HASH_FILENAME, strings.NewReader(hashSum), "application/octet-stream")
 	if err != nil {
-		return fmt.Errorf("Error uploading file '%s': %v", basename, err)
+		return fmt.Errorf("Error uploading hash: %v", err)
 	}
 
 	log.Printf("successfully uploaded %d Bytes to '%s:/%s'", n, s.bucket, p)
@@ -149,6 +152,15 @@ func (s *S3Store) Get(artifact Artifact) (err error) {
 	defer close(doneCh)
 
 	p := fmt.Sprintf("%s/%s/", artifact.Name, artifact.Version)
+
+	var hashObj *minio.Object
+	hashObj, err = s.client.GetObject(s.bucket, p+HASH_FILENAME)
+	var hashValue bytes.Buffer
+	if _, err = io.Copy(&hashValue, hashObj); err != nil {
+		err = fmt.Errorf("Error while fetching hash: %v", err)
+		return
+	}
+
 	objCh := s.client.ListObjectsV2(s.bucket, p, true, doneCh)
 	for obj := range objCh {
 		if obj.Err != nil {
@@ -159,8 +171,18 @@ func (s *S3Store) Get(artifact Artifact) (err error) {
 		if f == HASH_FILENAME {
 			continue
 		}
-		err = s.client.FGetObject(s.bucket, p+f, f)
-		return // TODO: check Hash
+		if err = s.client.FGetObject(s.bucket, p+f, f); err != nil {
+			return
+		}
+		var valid bool
+		if valid, err = checkSHA256(f, hashValue.String()); err != nil {
+			return
+		}
+		if !valid {
+			os.Remove(f)
+			return fmt.Errorf("hash-sum mismatch!")
+		}
+		return
 	}
 	err = fmt.Errorf("artifact not found")
 	return
