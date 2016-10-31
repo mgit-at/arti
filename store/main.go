@@ -36,11 +36,11 @@ type Artifact struct {
 	Version semver.Version
 }
 
-func NewArtifact(name, version string) (*Artifact, error) {
-	a := &Artifact{Name: name}
+func MakeArtifact(name, version string) (Artifact, error) {
+	a := Artifact{Name: name}
 	v, err := semver.ParseTolerant(version)
 	if err != nil {
-		return nil, fmt.Errorf("invalid version string: %v", err)
+		return Artifact{}, fmt.Errorf("invalid version string: %v", err)
 	}
 	a.Version = v
 	return a, nil

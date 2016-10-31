@@ -17,12 +17,10 @@ package cmd
 import (
 	"log"
 	"os"
-	"strings"
 
 	"github.com/mgit-at/arti/store"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var uploadCmd = &cobra.Command{
@@ -46,7 +44,7 @@ func init() {
 	uploadCmd.MarkFlagRequired("version")
 }
 
-func checkFlagsAndArgs(cmd *cobra.Command, args []string) (string, string, *store.Artifact) {
+func checkFlagsAndArgs(cmd *cobra.Command, args []string) (string, string, store.Artifact) {
 	if len(args) < 2 {
 		cmd.Help()
 		os.Exit(1)
@@ -62,7 +60,7 @@ func checkFlagsAndArgs(cmd *cobra.Command, args []string) (string, string, *stor
 		os.Exit(1)
 	}
 
-	a, err := store.NewArtifact(artifactName, artifactVersion)
+	a, err := store.MakeArtifact(artifactName, artifactVersion)
 	if err != nil {
 		log.Fatalln("invalid artifact specification:", err)
 	}
@@ -70,30 +68,12 @@ func checkFlagsAndArgs(cmd *cobra.Command, args []string) (string, string, *stor
 	return args[0], args[1], a
 }
 
-func selectStore(nameAndPath string) store.Store {
-	stores := viper.Sub("stores")
-	if stores == nil {
-		log.Fatal("no stores specified!")
-	}
-
-	np := strings.SplitN(nameAndPath, "/", 2)
-	if len(np) < 2 {
-		np = append(np, "")
-	}
-	s, err := store.NewStore(stores.Sub(np[0]), np[1])
-	if err != nil {
-		log.Fatalln("unable to initialize store:", err)
-	}
-	log.Printf("using store(type: %T): %+v", s, s)
-	return s
-}
-
 func uploadRun(cmd *cobra.Command, args []string) {
 	snp, fn, a := checkFlagsAndArgs(cmd, args)
 
 	s := selectStore(snp)
 
-	if err := s.Put(*a, fn); err != nil {
+	if err := s.Put(a, fn); err != nil {
 		log.Fatalln("upload failed:", err)
 	}
 }
