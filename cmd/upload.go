@@ -26,7 +26,7 @@ import (
 var uploadCmd = &cobra.Command{
 	Use:     "upload <store>/<bucket> <file>",
 	Aliases: []string{"put"},
-	Short:   "upload files to the store",
+	Short:   "upload artifacts to the store",
 	Long:    `...tba...`,
 	Run:     uploadRun,
 }

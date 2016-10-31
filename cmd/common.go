@@ -42,6 +42,6 @@ func selectStore(nameAndPath string) store.Store {
 	if err != nil {
 		log.Fatalln("unable to initialize store:", err)
 	}
-	log.Printf("using store(type: %T): %+v", s, s) // TODO: debug output
+	//	log.Printf("using store(type: %T): %+v", s, s)
 	return s
 }

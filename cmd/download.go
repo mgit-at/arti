@@ -26,7 +26,7 @@ import (
 var downloadCmd = &cobra.Command{
 	Use:     "download <store>/<bucket>",
 	Aliases: []string{"get"},
-	Short:   "download files from the store",
+	Short:   "download artifacts from the store",
 	Long:    `...tba...`,
 	Run:     downloadRun,
 }

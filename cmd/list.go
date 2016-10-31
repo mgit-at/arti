@@ -24,7 +24,7 @@ import (
 var listCmd = &cobra.Command{
 	Use:     "list <store>/<bucket>",
 	Aliases: []string{"ls"},
-	Short:   "list all files on the store",
+	Short:   "list all artifacts in the store",
 	Long:    `...tba...`,
 	Run:     listRun,
 }

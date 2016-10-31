@@ -26,7 +26,7 @@ import (
 var deleteCmd = &cobra.Command{
 	Use:     "delete <store>/<bucket>",
 	Aliases: []string{"del"},
-	Short:   "delete files from the store",
+	Short:   "delete artifacts from the store",
 	Long:    `...tba...`,
 	Run:     deleteRun,
 }

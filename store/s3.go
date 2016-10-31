@@ -67,9 +67,9 @@ func NewS3Store(cfg *viper.Viper, path string) (Store, error) {
 	case 2:
 		s.client, err = minio.NewV2(s.endpoint, s.accessKeyID, s.secretAccessKey, s.useSSL)
 	case 0:
+		s.version = 4
 		fallthrough
 	case 4:
-		s.version = 4
 		s.client, err = minio.NewV4(s.endpoint, s.accessKeyID, s.secretAccessKey, s.useSSL)
 	default:
 		err = fmt.Errorf("invalid S3 protocol version %d (only 2 and 4 are supported)", s.version)
@@ -239,8 +239,13 @@ func (s *S3Store) Del(artifact Artifact) (err error) {
 	}
 	close(objectsCh)
 
+	errCnt := 0
 	for e := range errorCh {
-		fmt.Println("Error detected during deletion: " + e.Err.Error())
+		err = e.Err
+		errCnt++
+	}
+	if errCnt > 0 {
+		err = fmt.Errorf("%d Errors during deletion, last: %v", errCnt, err)
 	}
 	return
 }
