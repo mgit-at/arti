@@ -109,6 +109,35 @@ func (s *S3Store) List() (list ArtifactList, err error) {
 	return
 }
 
+func (s *S3Store) Has(artifact Artifact) (exists bool, filename string, err error) {
+	doneCh := make(chan struct{})
+	defer close(doneCh)
+
+	hasHash := false
+	p := fmt.Sprintf("%s/%s/", artifact.Name, artifact.Version)
+	objCh := s.client.ListObjectsV2(s.bucket, p, true, doneCh)
+	for obj := range objCh {
+		if obj.Err != nil {
+			err = fmt.Errorf("Error while listing objects: %v", obj.Err)
+			return
+		}
+		f := path.Base(obj.Key)
+		if f == HASH_FILENAME {
+			hasHash = true
+		} else {
+			if filename != "" {
+				err = fmt.Errorf("found more then one file")
+				return
+			}
+			filename = f
+		}
+	}
+	if filename != "" || hasHash {
+		exists = true
+	}
+	return
+}
+
 func (s *S3Store) MakeBucket() (err error) {
 	err = s.client.MakeBucket(s.bucket, s.location)
 	if err != nil {
@@ -126,12 +155,19 @@ func (s *S3Store) Put(artifact Artifact, filename string) error {
 		return err
 	}
 
+	if exists, _, err := s.Has(artifact); err != nil {
+		return err
+	} else if exists {
+		return fmt.Errorf("artifact already exists")
+	}
+
 	basename := filepath.Base(filename)
 	p := fmt.Sprintf("%s/%s/", artifact.Name, artifact.Version)
 	n, err := s.client.FPutObject(s.bucket, p+basename, filename, "application/octet-stream")
 	if err != nil {
 		return fmt.Errorf("Error uploading file '%s': %v", basename, err)
 	}
+
 	hashSum, err := calcSHA256(filename)
 	if err != nil {
 		return fmt.Errorf("Error calculating SHA256 hash of '%s': %v", basename, err)
@@ -141,49 +177,70 @@ func (s *S3Store) Put(artifact Artifact, filename string) error {
 		return fmt.Errorf("Error uploading hash: %v", err)
 	}
 
-	log.Printf("successfully uploaded %d Bytes to '%s:/%s'", n, s.bucket, p)
+	log.Printf("successfully uploaded %d Bytes to '%s:/%s'", n, s.bucket, p+basename)
 	log.Printf("SHA256: %s", hashSum)
 
 	return nil
 }
 
 func (s *S3Store) Get(artifact Artifact) (err error) {
-	doneCh := make(chan struct{})
-	defer close(doneCh)
+	var exists bool
+	var f string
+	if exists, f, err = s.Has(artifact); err != nil {
+		return
+	}
+	if !exists {
+		err = fmt.Errorf("artifact not found")
+		return
+	}
 
 	p := fmt.Sprintf("%s/%s/", artifact.Name, artifact.Version)
-
 	var hashObj *minio.Object
-	hashObj, err = s.client.GetObject(s.bucket, p+HASH_FILENAME)
+	if hashObj, err = s.client.GetObject(s.bucket, p+HASH_FILENAME); err != nil {
+		return fmt.Errorf("Error while fetching hash: %v", err)
+	}
+
 	var hashValue bytes.Buffer
 	if _, err = io.Copy(&hashValue, hashObj); err != nil {
 		err = fmt.Errorf("Error while fetching hash: %v", err)
 		return
 	}
 
+	if err = s.client.FGetObject(s.bucket, p+f, f); err != nil {
+		err = fmt.Errorf("Error fetching file '%s': %v", f, err)
+		return
+	}
+	var valid bool
+	if valid, err = checkSHA256(f, hashValue.String()); err != nil {
+		return
+	}
+	if !valid {
+		os.Remove(f)
+		return fmt.Errorf("hash-sum mismatch!")
+	}
+	return
+}
+
+func (s *S3Store) Del(artifact Artifact) (err error) {
+	objectsCh := make(chan string, 10)
+	errorCh := s.client.RemoveObjects(s.bucket, objectsCh)
+
+	doneCh := make(chan struct{})
+	defer close(doneCh)
+
+	p := fmt.Sprintf("%s/%s/", artifact.Name, artifact.Version)
 	objCh := s.client.ListObjectsV2(s.bucket, p, true, doneCh)
 	for obj := range objCh {
 		if obj.Err != nil {
 			err = fmt.Errorf("Error while listing objects: %v", obj.Err)
 			return
 		}
-		f := path.Base(obj.Key)
-		if f == HASH_FILENAME {
-			continue
-		}
-		if err = s.client.FGetObject(s.bucket, p+f, f); err != nil {
-			return
-		}
-		var valid bool
-		if valid, err = checkSHA256(f, hashValue.String()); err != nil {
-			return
-		}
-		if !valid {
-			os.Remove(f)
-			return fmt.Errorf("hash-sum mismatch!")
-		}
-		return
+		objectsCh <- obj.Key
 	}
-	err = fmt.Errorf("artifact not found")
+	close(objectsCh)
+
+	for e := range errorCh {
+		fmt.Println("Error detected during deletion: " + e.Err.Error())
+	}
 	return
 }

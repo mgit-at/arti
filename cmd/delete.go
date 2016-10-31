@@ -23,24 +23,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var downloadCmd = &cobra.Command{
-	Use:     "download <store>/<bucket>",
-	Aliases: []string{"get"},
-	Short:   "download files from the store",
+var deleteCmd = &cobra.Command{
+	Use:     "delete <store>/<bucket>",
+	Aliases: []string{"del"},
+	Short:   "delete files from the store",
 	Long:    `...tba...`,
-	Run:     downloadRun,
+	Run:     deleteRun,
 }
 
 func init() {
-	RootCmd.AddCommand(downloadCmd)
+	RootCmd.AddCommand(deleteCmd)
 
-	downloadCmd.Flags().StringVarP(&artifactName, "name", "n", "", "the name of the artifact")
-	downloadCmd.MarkFlagRequired("name")
-	downloadCmd.Flags().StringVarP(&artifactVersion, "version", "v", "", "the version of the artifact (must adhere to the semantic versioning scheme)")
-	downloadCmd.MarkFlagRequired("version")
+	deleteCmd.Flags().StringVarP(&artifactName, "name", "n", "", "the name of the artifact")
+	deleteCmd.MarkFlagRequired("name")
+	deleteCmd.Flags().StringVarP(&artifactVersion, "version", "v", "", "the version of the artifact (must adhere to the semantic versioning scheme)")
+	deleteCmd.MarkFlagRequired("version")
 }
 
-func downloadCheckFlagsAndArgs(cmd *cobra.Command, args []string) (string, store.Artifact) {
+func deleteCheckFlagsAndArgs(cmd *cobra.Command, args []string) (string, store.Artifact) {
 	if len(args) < 1 {
 		cmd.Help()
 		os.Exit(1)
@@ -64,12 +64,12 @@ func downloadCheckFlagsAndArgs(cmd *cobra.Command, args []string) (string, store
 	return args[0], a
 }
 
-func downloadRun(cmd *cobra.Command, args []string) {
-	snp, a := downloadCheckFlagsAndArgs(cmd, args)
+func deleteRun(cmd *cobra.Command, args []string) {
+	snp, a := deleteCheckFlagsAndArgs(cmd, args)
 
 	s := selectStore(snp)
 
-	if err := s.Get(a); err != nil {
-		log.Fatalln("download failed:", err)
+	if err := s.Del(a); err != nil {
+		log.Fatalln("deletion failed:", err)
 	}
 }
