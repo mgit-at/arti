@@ -124,8 +124,8 @@ func (s *S3Store) Put(artifact Artifact, filename string) error {
 	}
 
 	basename := filepath.Base(filename)
-	path := fmt.Sprintf("%s/%s/", artifact.Name, artifact.Version)
-	n, err := s.client.FPutObject(s.bucket, path+basename, filename, "application/octet-stream")
+	p := fmt.Sprintf("%s/%s/", artifact.Name, artifact.Version)
+	n, err := s.client.FPutObject(s.bucket, p+basename, filename, "application/octet-stream")
 	if err != nil {
 		return fmt.Errorf("Error uploading file '%s': %v", basename, err)
 	}
@@ -133,17 +133,35 @@ func (s *S3Store) Put(artifact Artifact, filename string) error {
 	if err != nil {
 		return fmt.Errorf("Error calculating SHA256 hash of '%s': %v", basename, err)
 	}
-	_, err = s.client.PutObject(s.bucket, path+HASH_FILENAME, strings.NewReader(hashSum), "application/octet-stream")
+	_, err = s.client.PutObject(s.bucket, p+HASH_FILENAME, strings.NewReader(hashSum), "application/octet-stream")
 	if err != nil {
 		return fmt.Errorf("Error uploading file '%s': %v", basename, err)
 	}
 
-	log.Printf("successfully uploaded %d Bytes to '%s:/%s'", n, s.bucket, path)
+	log.Printf("successfully uploaded %d Bytes to '%s:/%s'", n, s.bucket, p)
 	log.Printf("SHA256: %s", hashSum)
 
 	return nil
 }
 
-func (s *S3Store) Get(artifact Artifact) error {
-	return ErrNotImplemented
+func (s *S3Store) Get(artifact Artifact) (err error) {
+	doneCh := make(chan struct{})
+	defer close(doneCh)
+
+	p := fmt.Sprintf("%s/%s/", artifact.Name, artifact.Version)
+	objCh := s.client.ListObjectsV2(s.bucket, p, true, doneCh)
+	for obj := range objCh {
+		if obj.Err != nil {
+			err = fmt.Errorf("Error while listing objects: %v", obj.Err)
+			return
+		}
+		f := path.Base(obj.Key)
+		if f == HASH_FILENAME {
+			continue
+		}
+		err = s.client.FGetObject(s.bucket, p+f, f)
+		return // TODO: check Hash
+	}
+	err = fmt.Errorf("artifact not found")
+	return
 }
