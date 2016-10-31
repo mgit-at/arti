@@ -3,8 +3,8 @@
   [stores.minio]
   type = "S3"
   endpoint = "127.0.0.1:9000"
-  access-key-id = "1234567890"
-  secret-access-key = "abcdefghijklmnopqrstuvwxyz"
+  access-key-id = "R3497LODFP5ZSZNM573T"
+  secret-access-key = "3gT2/oFQ/B9HL2eAhXx/9VQtMaCK6WNjo6/YIIek"
   location = "us-east-1"
   nossl = true
 

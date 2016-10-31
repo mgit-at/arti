@@ -16,6 +16,8 @@ package store
 
 import (
 	"fmt"
+	"log"
+	"path/filepath"
 	"regexp"
 
 	"github.com/minio/minio-go"
@@ -76,6 +78,29 @@ func (s *S3Store) List() error {
 	return ErrNotImplemented
 }
 
+func (s *S3Store) MakeBucket() (err error) {
+	err = s.client.MakeBucket(s.bucket, s.location)
+	if err != nil {
+		// Check to see if we already own this bucket (which happens if you run this twice)
+		if exists, err := s.client.BucketExists(s.bucket); err == nil && exists {
+			return nil
+		}
+		return err
+	}
+	return
+}
+
 func (s *S3Store) Put(artifact Artifact, file string) error {
-	return ErrNotImplemented
+	if err := s.MakeBucket(); err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("%s/%s/%s", artifact.Name, artifact.Version, filepath.Base(file))
+	n, err := s.client.FPutObject(s.bucket, path, file, "application/octet-stream")
+	if err != nil {
+		return err
+	}
+	log.Printf("successfully uploaded %d Bytes to %s / %s", n, s.bucket, path)
+
+	return nil
 }
