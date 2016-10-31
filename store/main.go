@@ -37,11 +37,11 @@ type Store interface {
 	Put(artifact Artifact, file string) error
 }
 
-func NewStore(cfg *viper.Viper) (store Store, err error) {
+func NewStore(cfg *viper.Viper, path string) (store Store, err error) {
 	t := cfg.GetString("type")
 	switch strings.ToLower(t) {
 	case "s3":
-		store, err = NewS3Store(cfg)
+		store, err = NewS3Store(cfg, path)
 	default:
 		err = fmt.Errorf("unknown store type: %s", t)
 	}

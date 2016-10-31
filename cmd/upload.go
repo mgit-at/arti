@@ -17,6 +17,7 @@ package cmd
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/mgit-at/arti/store"
 
@@ -26,7 +27,7 @@ import (
 )
 
 var uploadCmd = &cobra.Command{
-	Use:   "upload <store-name> <file>",
+	Use:   "upload <store>/<path or bucket> <file>",
 	Short: "upload files to the store",
 	Long:  `...tba...`,
 	Run:   uploadRun,
@@ -72,13 +73,17 @@ func checkFlagsAndArgs(cmd *cobra.Command, args []string) (string, string, store
 	return args[0], args[1], a
 }
 
-func selectStore(name string) store.Store {
+func selectStore(nameAndPath string) store.Store {
 	stores := viper.Sub("stores")
 	if stores == nil {
 		log.Fatal("no stores specified!")
 	}
 
-	s, err := store.NewStore(stores.Sub(name))
+	np := strings.SplitN(nameAndPath, "/", 2)
+	if len(np) < 2 {
+		np = append(np, "")
+	}
+	s, err := store.NewStore(stores.Sub(np[0]), np[1])
 	if err != nil {
 		log.Fatalln("unable to initialize store:", err)
 	}
@@ -87,9 +92,9 @@ func selectStore(name string) store.Store {
 }
 
 func uploadRun(cmd *cobra.Command, args []string) {
-	sn, fn, a := checkFlagsAndArgs(cmd, args)
+	snp, fn, a := checkFlagsAndArgs(cmd, args)
 
-	s := selectStore(sn)
+	s := selectStore(snp)
 
 	// TODO: calculate checksum and upload it as well
 	if err := s.Put(a, fn); err != nil {

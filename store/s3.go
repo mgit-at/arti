@@ -16,9 +16,14 @@ package store
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/minio/minio-go"
 	"github.com/spf13/viper"
+)
+
+var (
+	bucketNameRe = regexp.MustCompile("^[-_.A-Za-z0-9]{3,}$")
 )
 
 type S3Store struct {
@@ -28,12 +33,19 @@ type S3Store struct {
 	useSSL          bool
 	version         int
 	location        string
+	bucket          string
 
 	client *minio.Client
 }
 
-func NewS3Store(cfg *viper.Viper) (Store, error) {
+func NewS3Store(cfg *viper.Viper, path string) (Store, error) {
 	s := &S3Store{}
+
+	if !bucketNameRe.MatchString(path) {
+		return nil, fmt.Errorf("'%s' is not a valid bucket name", path)
+	}
+	s.bucket = path
+
 	s.endpoint = cfg.GetString("endpoint")
 	s.accessKeyID = cfg.GetString("access-key-id")
 	s.secretAccessKey = cfg.GetString("secret-access-key")

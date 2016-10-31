@@ -6,6 +6,7 @@
   access-key-id = "1234567890"
   secret-access-key = "abcdefghijklmnopqrstuvwxyz"
   location = "us-east-1"
+  nossl = true
 
   [stores.gcs]
   type = "S3"
@@ -13,4 +14,3 @@
   endpoint = "storage.googleapis.com"
   access-key-id = "helloworld"
   secret-access-key = "very-very-secret-dont-tell-anyone"
-  nossl = true
