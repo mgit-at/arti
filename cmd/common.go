@@ -23,6 +23,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+var (
+	artifactName    string
+	artifactVersion string
+)
+
 func selectStore(nameAndPath string) store.Store {
 	stores := viper.Sub("stores")
 	if stores == nil {

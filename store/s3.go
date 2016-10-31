@@ -143,3 +143,7 @@ func (s *S3Store) Put(artifact Artifact, filename string) error {
 
 	return nil
 }
+
+func (s *S3Store) Get(artifact Artifact) error {
+	return ErrNotImplemented
+}

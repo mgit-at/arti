@@ -66,6 +66,7 @@ type ArtifactList map[string][]ArtifactListEntry
 type Store interface {
 	List() (ArtifactList, error)
 	Put(artifact Artifact, filename string) error
+	Get(artifact Artifact) error
 }
 
 func calcSHA256(filename string) (string, error) {

@@ -23,25 +23,25 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var uploadCmd = &cobra.Command{
-	Use:     "upload <store>/<bucket> <file>",
-	Aliases: []string{"put"},
-	Short:   "upload files to the store",
+var downloadCmd = &cobra.Command{
+	Use:     "download <store>/<bucket> <file>",
+	Aliases: []string{"get"},
+	Short:   "download files from the store",
 	Long:    `...tba...`,
-	Run:     uploadRun,
+	Run:     downloadRun,
 }
 
 func init() {
-	RootCmd.AddCommand(uploadCmd)
+	RootCmd.AddCommand(downloadCmd)
 
-	uploadCmd.Flags().StringVarP(&artifactName, "name", "n", "", "the name of the artifact")
-	uploadCmd.MarkFlagRequired("name")
-	uploadCmd.Flags().StringVarP(&artifactVersion, "version", "v", "", "the version of the artifact (must adhere to the semantic versioning scheme)")
-	uploadCmd.MarkFlagRequired("version")
+	downloadCmd.Flags().StringVarP(&artifactName, "name", "n", "", "the name of the artifact")
+	downloadCmd.MarkFlagRequired("name")
+	downloadCmd.Flags().StringVarP(&artifactVersion, "version", "v", "", "the version of the artifact (must adhere to the semantic versioning scheme)")
+	downloadCmd.MarkFlagRequired("version")
 }
 
-func uploadCheckFlagsAndArgs(cmd *cobra.Command, args []string) (string, string, store.Artifact) {
-	if len(args) < 2 {
+func downloadCheckFlagsAndArgs(cmd *cobra.Command, args []string) (string, store.Artifact) {
+	if len(args) < 1 {
 		cmd.Help()
 		os.Exit(1)
 	}
@@ -61,15 +61,15 @@ func uploadCheckFlagsAndArgs(cmd *cobra.Command, args []string) (string, string,
 		log.Fatalln("invalid artifact specification:", err)
 	}
 
-	return args[0], args[1], a
+	return args[0], a
 }
 
-func uploadRun(cmd *cobra.Command, args []string) {
-	snp, fn, a := uploadCheckFlagsAndArgs(cmd, args)
+func downloadRun(cmd *cobra.Command, args []string) {
+	snp, a := downloadCheckFlagsAndArgs(cmd, args)
 
 	s := selectStore(snp)
 
-	if err := s.Put(a, fn); err != nil {
-		log.Fatalln("upload failed:", err)
+	if err := s.Get(a); err != nil {
+		log.Fatalln("download failed:", err)
 	}
 }
