@@ -31,8 +31,9 @@ when uploading.
 
 ## Examples
 
-All these examples assume that there file `$HOME/.arti.toml` exists with the contents
-of `sample-config.toml`
+All these examples assume that the file `$HOME/.arti.toml` exists and define 2 stores `minio` and
+`gcs`.
+
 
 ### Uploading artefacts
 
