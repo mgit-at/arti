@@ -27,11 +27,11 @@ format, see [this file](sample-config.toml) for an example.
 By default `arti` looks for the file `$HOME/.arti.toml` but you may override this using the `-c`
 option. Besides toml you may use json or yaml as a config file format.
 
-Any config option may be overrided using environment variables. Environment variable names start
+Any config option may be overridden using environment variables. Environment variable names start
 with the prefix `ARTI_` followed by the key name of the config option where all `.` are replaced
-be `__` and all `-` are replaced by `_`.
+with `__` and all `-` are replaced with `_`.
 
-For example the environment variable for the secret-access-key config option of the store
+For example the environment variable for the `secret-access-key` config option of the store
 named `minio` looks like this:
 
 ```
