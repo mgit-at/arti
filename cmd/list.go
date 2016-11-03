@@ -21,6 +21,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type ByteSize int64
+
 var listCmd = &cobra.Command{
 	Use:     "list <store>/<bucket>",
 	Aliases: []string{"ls"},
@@ -29,8 +31,14 @@ var listCmd = &cobra.Command{
 	Run:     listRun,
 }
 
+var (
+	numericSize bool
+)
+
 func init() {
 	RootCmd.AddCommand(listCmd)
+
+	listCmd.Flags().BoolVarP(&numericSize, "numeric-size", "N", false, "print file sizes in bytes rather than in human readable format")
 }
 
 func listCheckFlagsAndArgs(cmd *cobra.Command, args []string) string {
@@ -55,7 +63,12 @@ func listRun(cmd *cobra.Command, args []string) {
 	for name, versions := range artifacts {
 		log.Printf("%s:", name)
 		for _, v := range versions {
-			log.Printf("  %v: %s", v.Version, v.Filename)
+			if numericSize {
+				log.Printf("  %v: %12d  %s", v.Version, v.Filesize, v.Filename)
+			} else {
+				size, mult := humanizeBytes(v.Filesize)
+				log.Printf("  %v: %6.1f %sB  %s", v.Version, size, mult, v.Filename)
+			}
 		}
 	}
 }

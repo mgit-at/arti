@@ -16,11 +16,21 @@ package cmd
 
 import (
 	"log"
+	"math"
 	"strings"
 
 	"github.com/mgit-at/arti/store"
 
 	"github.com/spf13/viper"
+)
+
+const (
+	_          = iota
+	KB float64 = 1 << (10 * iota)
+	MB
+	GB
+	TB
+	PB
 )
 
 var (
@@ -48,4 +58,26 @@ func selectStore(nameAndPath string) store.Store {
 	}
 	//	log.Printf("using store(type: %T): %+v", s, s)
 	return s
+}
+
+func logn(n, b float64) float64 {
+	return math.Log(n) / math.Log(b)
+}
+
+func humanizeBytes(size int64) (float64, string) {
+	e := math.Floor(logn(float64(size), 1024))
+	switch e {
+	case 0:
+		return float64(size), ""
+	case 1:
+		return float64(size) / KB, "k"
+	case 2:
+		return float64(size) / MB, "M"
+	case 3:
+		return float64(size) / GB, "G"
+	case 4:
+		return float64(size) / TB, "T"
+	default:
+		return float64(size) / PB, "P"
+	}
 }

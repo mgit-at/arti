@@ -32,7 +32,7 @@ var downloadCmd = &cobra.Command{
 }
 
 var (
-	keepCorrupted = false
+	keepCorrupted bool
 )
 
 func init() {

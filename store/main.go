@@ -49,10 +49,11 @@ func MakeArtifact(name, version string) (Artifact, error) {
 type ArtifactListEntry struct {
 	Version  semver.Version
 	Filename string
+	Filesize int64
 }
 
-func MakeArtifactListEntry(version, filename string) (ArtifactListEntry, error) {
-	a := ArtifactListEntry{Filename: filename}
+func MakeArtifactListEntry(version, filename string, filesize int64) (ArtifactListEntry, error) {
+	a := ArtifactListEntry{Filename: filename, Filesize: filesize}
 	v, err := semver.ParseTolerant(version)
 	if err != nil {
 		return ArtifactListEntry{}, fmt.Errorf("invalid version string: %v", err)
