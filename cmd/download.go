@@ -27,8 +27,13 @@ var downloadCmd = &cobra.Command{
 	Use:     "download <store>/<bucket> [ <filename> ]",
 	Aliases: []string{"get"},
 	Short:   "download artifacts from the store",
-	Long:    `...tba...`,
-	Run:     downloadRun,
+	Long: `This downloads an artifact from the store and checks the hash.
+Unless --keep-corrupted is supplied the file gets deleted on hash mismatch.
+
+By default the file will be downloaded into the current directory with the
+same name that was used to upload it. You may supply a filename which will then
+be used as the name for downloaded file.`,
+	Run: downloadRun,
 }
 
 var (
@@ -42,7 +47,7 @@ func init() {
 	downloadCmd.MarkFlagRequired("name")
 	downloadCmd.Flags().StringVarP(&artifactVersion, "version", "v", "", "the version of the artifact (must adhere to the semantic versioning scheme)")
 	downloadCmd.MarkFlagRequired("version")
-	downloadCmd.Flags().BoolVar(&keepCorrupted, "keep-corrupted", false, "don't delete file if the hash does not match")
+	downloadCmd.Flags().BoolVar(&keepCorrupted, "keep-corrupted", false, "don't delete the downloaded file if the hash does not match")
 }
 
 func downloadCheckFlagsAndArgs(cmd *cobra.Command, args []string) (string, string, store.Artifact) {

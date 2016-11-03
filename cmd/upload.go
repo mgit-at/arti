@@ -27,8 +27,9 @@ var uploadCmd = &cobra.Command{
 	Use:     "upload <store>/<bucket> <file>",
 	Aliases: []string{"put"},
 	Short:   "upload artifacts to the store",
-	Long:    `...tba...`,
-	Run:     uploadRun,
+	Long: `This uploads an artifact to the store. It is an error if the
+artifact name/version tuple already exists.`,
+	Run: uploadRun,
 }
 
 func init() {
