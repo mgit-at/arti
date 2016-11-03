@@ -1,15 +1,19 @@
 # arti
 
-`arti` is a simple tool to upload/download/manage artifacts to a cloud storage provider
-such as S3. It is more general approach to what [deb-s3](https://github.com/krobertson/deb-s3)
+`arti` is a simple tool to upload/download/manage artifacts to/from a cloud storage provider
+such as S3. It is a more general approach to what [deb-s3](https://github.com/krobertson/deb-s3)
 does.
-Altough `arti` it is intended to support multiple storage backends only S3 is supported for now.
+Although `arti` is intended to support multiple storage backends only S3 is supported for now.
 
 `arti` will organize the artifacts according to the following scheme:
 
 ```
-    <artefact-name1>/<artefact-version>/<filename>
-    <artefact-name1>/<artefact-version>/sha256sum
+    <artefact-name>/<artefact-version>/
+         <filename>
+         sha256sum
+    <artefact-name2>/<artefact-version2>/
+         <filename2>
+         sha256sum
 ```
 
 The sha256sum will be generated on upload and checked when downloading.
@@ -19,13 +23,15 @@ The sha256sum will be generated on upload and checked when downloading.
 `$HOME/.arti.toml` but you may override this using the `-c` option. Besides toml you may
 use json or yaml as a config file format.
 
-Store addresses consist of a store name and a bucket/directory within that store. `arti` will create it`s
-directory structure within the given bucket/path. When uploading the bucket will be created if it does
-not exist already.
+Store addresses consist of a store name and a bucket within that store. `arti` will create it`s
+directory structure within the given bucket. If the bucket does not exist it will be created
+when uploading.
+
+
 
 ## Examples
 
-All these examples assume that there the file `$HOME/.arti.toml` exists with the contents
+All these examples assume that there file `$HOME/.arti.toml` exists with the contents
 of `sample-config.toml`
 
 ### Uploading artefacts
