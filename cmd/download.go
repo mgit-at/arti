@@ -24,12 +24,16 @@ import (
 )
 
 var downloadCmd = &cobra.Command{
-	Use:     "download <store>/<bucket>",
+	Use:     "download <store>/<bucket> [ <filename> ]",
 	Aliases: []string{"get"},
 	Short:   "download artifacts from the store",
 	Long:    `...tba...`,
 	Run:     downloadRun,
 }
+
+var (
+	keepCorrupted = false
+)
 
 func init() {
 	RootCmd.AddCommand(downloadCmd)
@@ -38,9 +42,10 @@ func init() {
 	downloadCmd.MarkFlagRequired("name")
 	downloadCmd.Flags().StringVarP(&artifactVersion, "version", "v", "", "the version of the artifact (must adhere to the semantic versioning scheme)")
 	downloadCmd.MarkFlagRequired("version")
+	downloadCmd.Flags().BoolVar(&keepCorrupted, "keep-corrupted", false, "don't delete file if the hash does not match")
 }
 
-func downloadCheckFlagsAndArgs(cmd *cobra.Command, args []string) (string, store.Artifact) {
+func downloadCheckFlagsAndArgs(cmd *cobra.Command, args []string) (string, string, store.Artifact) {
 	if len(args) < 1 {
 		cmd.Help()
 		os.Exit(1)
@@ -61,15 +66,19 @@ func downloadCheckFlagsAndArgs(cmd *cobra.Command, args []string) (string, store
 		log.Fatalln("invalid artifact specification:", err)
 	}
 
-	return args[0], a
+	if len(args) == 1 {
+		return args[0], "", a
+	} else {
+		return args[0], args[1], a
+	}
 }
 
 func downloadRun(cmd *cobra.Command, args []string) {
-	snp, a := downloadCheckFlagsAndArgs(cmd, args)
+	snp, fn, a := downloadCheckFlagsAndArgs(cmd, args)
 
 	s := selectStore(snp)
 
-	if err := s.Get(a); err != nil {
+	if err := s.Get(a, fn, keepCorrupted); err != nil {
 		log.Fatalln("download failed:", err)
 	}
 }

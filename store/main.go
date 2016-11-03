@@ -67,7 +67,7 @@ type Store interface {
 	List() (ArtifactList, error)
 	Has(artifact Artifact) (bool, string, error)
 	Put(artifact Artifact, filename string) error
-	Get(artifact Artifact) error
+	Get(artifact Artifact, filename string, keepCorrupted bool) error
 	Del(artifact Artifact) error
 }
 

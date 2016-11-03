@@ -183,7 +183,7 @@ func (s *S3Store) Put(artifact Artifact, filename string) error {
 	return nil
 }
 
-func (s *S3Store) Get(artifact Artifact) (err error) {
+func (s *S3Store) Get(artifact Artifact, filename string, keepCorrupted bool) (err error) {
 	var exists bool
 	var f string
 	if exists, f, err = s.Has(artifact); err != nil {
@@ -206,7 +206,11 @@ func (s *S3Store) Get(artifact Artifact) (err error) {
 		return
 	}
 
-	if err = s.client.FGetObject(s.bucket, p+f, f); err != nil {
+	target := filename
+	if target == "" {
+		target = f
+	}
+	if err = s.client.FGetObject(s.bucket, p+f, target); err != nil {
 		err = fmt.Errorf("Error fetching file '%s': %v", f, err)
 		return
 	}
@@ -215,7 +219,9 @@ func (s *S3Store) Get(artifact Artifact) (err error) {
 		return
 	}
 	if !valid {
-		os.Remove(f)
+		if !keepCorrupted {
+			os.Remove(f)
+		}
 		return fmt.Errorf("hash-sum mismatch!")
 	}
 	return
