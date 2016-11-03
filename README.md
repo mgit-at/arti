@@ -18,15 +18,25 @@ Although `arti` is intended to support multiple storage backends only S3 is supp
 
 The sha256sum will be generated on upload and checked when downloading.
 
-`arti` uses a simple config file which can be used to define so called stores. See
-[this example](sample-config.toml) for more details. By default `arti` looks for the file
-`$HOME/.arti.toml` but you may override this using the `-c` option. Besides toml you may
-use json or yaml as a config file format.
 
-Store addresses consist of a store name and a bucket within that store. `arti` will create it`s
-directory structure within the given bucket. If the bucket does not exist it will be created
-when uploading.
+## Configuration
 
+`arti` uses [cobra](https://github.com/spf13/cobra)/[viper](https://github.com/spf13/viper) for
+command-line/config file handling. You may configure `arti` stores using a simple config file
+format, see [this file](sample-config.toml) for an example.
+By default `arti` looks for the file `$HOME/.arti.toml` but you may override this using the `-c`
+option. Besides toml you may use json or yaml as a config file format.
+
+Any config option may be overrided using environment variables. Environment variable names start
+with the prefix `ARTI_` followed by the key name of the config option where all `.` are replaced
+be `__` and all `-` are replaced by `_`.
+
+For example the environment variable for the secret-access-key config option of the store
+named `minio` looks like this:
+
+```
+ARTI_STORES__MINIO__SECRET_ACCESS_KEY=<very-secret>
+```
 
 
 ## Examples
@@ -34,6 +44,9 @@ when uploading.
 All these examples assume that the file `$HOME/.arti.toml` exists and defines 2 stores named `minio`
 and `gcs`.
 
+Store addresses consist of a store name and a bucket within that store. `arti` will create it`s
+directory structure within the given bucket. If the bucket does not exist it will be created
+when uploading.
 
 ### Uploading artefacts
 

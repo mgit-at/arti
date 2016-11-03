@@ -52,6 +52,13 @@ func selectStore(nameAndPath string) store.Store {
 	if cfg == nil {
 		log.Fatalln("no such store:", np[0])
 	}
+
+	tmp := viper.Get("stores.minio.location-asdf")
+	log.Println("%s", tmp)
+
+	cfg.SetEnvPrefix("arti_stores__" + np[0] + "_")
+	cfg.SetEnvKeyReplacer(strings.NewReplacer(".", "__", "-", "_"))
+	cfg.AutomaticEnv()
 	s, err := store.NewStore(cfg, np[1])
 	if err != nil {
 		log.Fatalln("unable to initialize store:", err)

@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"log"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -58,6 +59,8 @@ func initConfig() {
 		viper.SetConfigName(".arti") // name of config file (without extension)
 		viper.AddConfigPath("$HOME") // adding home directory as first search path
 	}
+	viper.SetEnvPrefix("arti")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "__", "-", "_"))
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
