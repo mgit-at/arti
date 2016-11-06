@@ -17,7 +17,7 @@ Although `arti` is intended to support multiple storage backends only S3 is supp
 ```
 
 The checksum file will be generated on upload and checked when downloading.
-The checksum file contains a algorithm specifier and the hash value seperated by a ':`. For now
+The checksum file contains a algorithm specifier and the hash value seperated by a `:`. For now
 the only supported checksum algorightm is SHA-256 which uses the identifier `sha256`.
 
 
