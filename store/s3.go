@@ -29,8 +29,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-const HASH_FILENAME = "sha256sum"
-
 var (
 	bucketNameRe = regexp.MustCompile("^[-_.A-Za-z0-9]{3,}$")
 )
@@ -93,10 +91,10 @@ func (s *S3Store) List() (list ArtifactList, err error) {
 			err = fmt.Errorf("Error while listing objects: %v", obj.Err)
 			return
 		}
-		nv, f := path.Split(obj.Key)
-		if f == HASH_FILENAME {
+		if strings.HasSuffix(obj.Key, CSumExt) {
 			continue
 		}
+		nv, f := path.Split(obj.Key)
 		n, v := path.Split(strings.TrimSuffix(nv, "/"))
 		n = strings.TrimSuffix(n, "/")
 		if a, err := MakeArtifactListEntry(v, f, obj.Size); err == nil {
@@ -114,7 +112,7 @@ func (s *S3Store) Has(artifact Artifact) (exists bool, filename string, err erro
 	defer close(doneCh)
 
 	hasHash := false
-	p := fmt.Sprintf("%s/%s/", artifact.Name, artifact.Version)
+	p := path.Join(artifact.Name, artifact.Version.String())
 	objCh := s.client.ListObjectsV2(s.bucket, p, true, doneCh)
 	for obj := range objCh {
 		if obj.Err != nil {
@@ -122,7 +120,7 @@ func (s *S3Store) Has(artifact Artifact) (exists bool, filename string, err erro
 			return
 		}
 		f := path.Base(obj.Key)
-		if f == HASH_FILENAME {
+		if strings.HasSuffix(f, CSumExt) {
 			hasHash = true
 		} else {
 			if filename != "" {
@@ -162,23 +160,23 @@ func (s *S3Store) Put(artifact Artifact, filename string) error {
 	}
 
 	basename := filepath.Base(filename)
-	p := fmt.Sprintf("%s/%s/", artifact.Name, artifact.Version)
-	n, err := s.client.FPutObject(s.bucket, p+basename, filename, "application/octet-stream")
+	p := path.Join(artifact.Name, artifact.Version.String(), basename)
+	n, err := s.client.FPutObject(s.bucket, p, filename, "application/octet-stream")
 	if err != nil {
 		return fmt.Errorf("Error uploading file '%s': %v", basename, err)
 	}
 
-	hashSum, err := calcSHA256(filename)
+	hashSum, err := calcCSum(filename)
 	if err != nil {
-		return fmt.Errorf("Error calculating SHA256 hash of '%s': %v", basename, err)
+		return fmt.Errorf("Error calculating checksum of '%s': %v", basename, err)
 	}
-	_, err = s.client.PutObject(s.bucket, p+HASH_FILENAME, strings.NewReader(hashSum), "application/octet-stream")
+	_, err = s.client.PutObject(s.bucket, p+CSumExt, strings.NewReader(hashSum), "application/octet-stream")
 	if err != nil {
 		return fmt.Errorf("Error uploading hash: %v", err)
 	}
 
-	log.Printf("successfully uploaded %d Bytes to '%s:/%s'", n, s.bucket, p+basename)
-	log.Printf("SHA256: %s", hashSum)
+	log.Printf("successfully uploaded %d Bytes to '%s:/%s'", n, s.bucket, p)
+	log.Printf("%s", hashSum)
 
 	return nil
 }
@@ -194,9 +192,9 @@ func (s *S3Store) Get(artifact Artifact, filename string, keepCorrupted bool) (e
 		return
 	}
 
-	p := fmt.Sprintf("%s/%s/", artifact.Name, artifact.Version)
+	p := path.Join(artifact.Name, artifact.Version.String(), f)
 	var hashObj *minio.Object
-	if hashObj, err = s.client.GetObject(s.bucket, p+HASH_FILENAME); err != nil {
+	if hashObj, err = s.client.GetObject(s.bucket, p+CSumExt); err != nil {
 		return fmt.Errorf("Error while fetching hash: %v", err)
 	}
 
@@ -210,12 +208,12 @@ func (s *S3Store) Get(artifact Artifact, filename string, keepCorrupted bool) (e
 	if target == "" {
 		target = f
 	}
-	if err = s.client.FGetObject(s.bucket, p+f, target); err != nil {
+	if err = s.client.FGetObject(s.bucket, p, target); err != nil {
 		err = fmt.Errorf("Error fetching file '%s': %v", f, err)
 		return
 	}
 	var valid bool
-	if valid, err = checkSHA256(f, hashValue.String()); err != nil {
+	if valid, err = checkCSum(f, hashValue.String()); err != nil {
 		return
 	}
 	if !valid {
@@ -234,7 +232,7 @@ func (s *S3Store) Del(artifact Artifact) (err error) {
 	doneCh := make(chan struct{})
 	defer close(doneCh)
 
-	p := fmt.Sprintf("%s/%s/", artifact.Name, artifact.Version)
+	p := path.Join(artifact.Name, artifact.Version.String())
 	objCh := s.client.ListObjectsV2(s.bucket, p, true, doneCh)
 	for obj := range objCh {
 		if obj.Err != nil {
