@@ -141,8 +141,8 @@ arti ls minio/test -n hello
 Output:
 
 ```
-1.2.5   8.2 MB world.tar.xz
-1.2.4 472.1 kB world.tar.xz
+1.2.5   8.2MB world.tar.xz
+1.2.4 472.1kB world.tar.xz
 ```
 
 It is also possible to define version ranges:
@@ -160,7 +160,7 @@ arti ls minio/test -n hello -v "1.2.4"
 Output:
 
 ```
-1.2.4 472.1 kB world.tar.xz
+1.2.4 472.1kB world.tar.xz
 ```
 
 For full syntax of version ranges please see this [documentation](https://github.com/blang/semver).
