@@ -17,13 +17,16 @@ Although `arti` is intended to support multiple storage backends only S3 is supp
 ```
 
 The checksum file will be generated on upload and checked when downloading.
-This file contains a algorithm specifier and the hash value seperated by a `:`. For now the only
-supported checksum algorightm is SHA-256 which uses the identifier `sha256` and the hex encoded
-hash value:
+This file contains a algorithm specifier and the hash value seperated by a `:`.
+
+
+For now the only supported checksum algorightm is SHA-256 which uses the identifier `sha256`
+and the hex-encoded hash value:
 
 ```
-sha256:hex(SHA246(<file>))
+sha256:hex(SHA256(<file>))
 ```
+
 
 
 ## Configuration
@@ -44,6 +47,7 @@ named `minio` looks like this:
 ```
 ARTI_STORES__MINIO__SECRET_ACCESS_KEY=<very-secret>
 ```
+
 
 
 ## Examples
