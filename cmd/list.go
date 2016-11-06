@@ -19,6 +19,7 @@ import (
 	"os"
 	"sort"
 
+	"github.com/mgit-at/arti/store"
 	"github.com/spf13/cobra"
 )
 
@@ -39,6 +40,7 @@ func init() {
 	RootCmd.AddCommand(listCmd)
 
 	listCmd.Flags().BoolVarP(&numericSize, "numeric-size", "N", false, "print file sizes in bytes rather than in human readable format")
+	listCmd.Flags().StringVarP(&artifactName, "name", "n", "", "the name of the artifact")
 }
 
 func listCheckFlagsAndArgs(cmd *cobra.Command, args []string) string {
@@ -55,28 +57,50 @@ func listRun(cmd *cobra.Command, args []string) {
 
 	s := selectStore(snp)
 
-	artifacts, err := s.List()
+	artifacts, err := s.List(artifactName)
 	if err != nil {
 		log.Fatalln("listing artifacts failed:", err)
 	}
 
+	if artifactName == "" {
+		listNames(artifacts)
+	} else {
+		if av, found := artifacts[artifactName]; found {
+			listVersions(av)
+		}
+	}
+}
+
+func listNames(a store.ArtifactList) {
 	names := []string{}
-	for name := range artifacts {
+	for name := range a {
 		names = append(names, name)
 	}
 	sort.Strings(names)
-	for _, name := range names {
-		versions := artifacts[name]
-		sort.Sort(sort.Reverse(versions))
 
-		log.Printf("%s:", name)
-		for _, v := range versions {
-			if numericSize {
-				log.Printf("  %v: %12d  %s", v.Version, v.Filesize, v.Filename)
-			} else {
-				size, mult := humanizeBytes(v.Filesize)
-				log.Printf("  %v: %6.1f %sB  %s", v.Version, size, mult, v.Filename)
-			}
+	for _, name := range names {
+		sizeTotal := int64(0)
+		for _, v := range a[name] {
+			sizeTotal += v.Filesize
+		}
+
+		if numericSize {
+			log.Printf("%s\t%d %12d", name, len(a[name]), sizeTotal)
+		} else {
+			size, mult := humanizeBytes(sizeTotal)
+			log.Printf("%s\t%d %6.1f%sB", name, len(a[name]), size, mult)
+		}
+	}
+}
+
+func listVersions(av store.ArtifactVersions) {
+	sort.Sort(sort.Reverse(av))
+	for _, v := range av {
+		if numericSize {
+			log.Printf("%v\t%12d %s", v.Version, v.Filesize, v.Filename)
+		} else {
+			size, mult := humanizeBytes(v.Filesize)
+			log.Printf("%v\t%6.1f%sB %s", v.Version, size, mult, v.Filename)
 		}
 	}
 }

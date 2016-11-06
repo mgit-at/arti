@@ -79,13 +79,17 @@ func NewS3Store(cfg *viper.Viper, path string) (Store, error) {
 	return Store(s), nil
 }
 
-func (s *S3Store) List() (list ArtifactList, err error) {
+func (s *S3Store) List(name string) (list ArtifactList, err error) {
 	list = make(ArtifactList)
 
 	doneCh := make(chan struct{})
 	defer close(doneCh)
 
-	objCh := s.client.ListObjectsV2(s.bucket, "", true, doneCh)
+	p := name
+	if p != "" {
+		p += "/"
+	}
+	objCh := s.client.ListObjectsV2(s.bucket, p, true, doneCh)
 	for obj := range objCh {
 		if obj.Err != nil {
 			err = fmt.Errorf("Error while listing objects: %v", obj.Err)
