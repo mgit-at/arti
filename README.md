@@ -41,11 +41,11 @@ stores:
     type: "S3"
     endpoint: "127.0.0.1:9000"
     access-key-id: "my-minio-username"
-    secret-access-key: ""
+    secret-access-key: "i-will-never-tell-anyone-my-secret"
     location: "us-east-1"
 ```
 
-Fore more examples see [this file](sample-config.yaml) [or this](sample-config.toml). By default
+Fore more examples see this [file](sample-config.yaml) or [this](sample-config.toml). By default
 `arti` looks for the file `$HOME/.arti.(yaml|toml)` but you may override this using the `-c` option.
 Besides YAML and TOML you may use JSON and some other syntax. For a full list please read the
 [viper documentation](https://github.com/spf13/viper).
@@ -65,7 +65,7 @@ ARTI_STORES__MINIO__SECRET_ACCESS_KEY=<very-secret>
 
 ## Examples
 
-All these examples assume that the file `$HOME/.arti.toml` exists and defines 2 stores named `minio`
+All these examples assume that the file `$HOME/.arti.yaml` exists and defines 2 stores named `minio`
 and `gcs`.
 
 Store addresses consist of a store name and a bucket within that store. `arti` will create it`s
