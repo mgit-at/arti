@@ -75,7 +75,7 @@ func (a ArtifactVersions) Swap(i, j int) {
 type ArtifactList map[string]ArtifactVersions
 
 type Store interface {
-	List(name string) (ArtifactList, error)
+	List(name string, versions semver.Range) (ArtifactList, error)
 	Has(artifact Artifact) (bool, string, error)
 	Put(artifact Artifact, filename string) error
 	Get(artifact Artifact, filename string, keepCorrupted bool) error

@@ -19,6 +19,7 @@ import (
 	"os"
 	"sort"
 
+	"github.com/blang/semver"
 	"github.com/mgit-at/arti/store"
 	"github.com/spf13/cobra"
 )
@@ -40,24 +41,34 @@ func init() {
 	RootCmd.AddCommand(listCmd)
 
 	listCmd.Flags().BoolVarP(&numericSize, "numeric-size", "N", false, "print file sizes in bytes rather than in human readable format")
-	listCmd.Flags().StringVarP(&artifactName, "name", "n", "", "the name of the artifact")
+	listCmd.Flags().StringVarP(&artifactName, "name", "n", "", "list all version of this artifact")
+	listCmd.Flags().StringVarP(&artifactVersion, "version", "v", "", "range of version to list")
 }
 
-func listCheckFlagsAndArgs(cmd *cobra.Command, args []string) string {
+func listCheckFlagsAndArgs(cmd *cobra.Command, args []string) (snp string, versions semver.Range) {
 	if len(args) < 1 {
 		cmd.Help()
 		os.Exit(1)
 	}
+	snp = args[0]
 
-	return args[0]
+	versions = nil
+	if artifactVersion != "" {
+		var err error
+		if versions, err = semver.ParseRange(artifactVersion); err != nil {
+			log.Fatalln("invalid version range:", err)
+		}
+	}
+
+	return
 }
 
 func listRun(cmd *cobra.Command, args []string) {
-	snp := listCheckFlagsAndArgs(cmd, args)
+	snp, versions := listCheckFlagsAndArgs(cmd, args)
 
 	s := selectStore(snp)
 
-	artifacts, err := s.List(artifactName)
+	artifacts, err := s.List(artifactName, versions)
 	if err != nil {
 		log.Fatalln("listing artifacts failed:", err)
 	}

@@ -125,12 +125,45 @@ arti ls minio/test
 Output:
 
 ```
-foo:
-  1.2.3:  366.0 kB  foo-1.2.3.tar.gz
-hello:
-  1.2.4:  472.1 kB  world.tar.xz
-  1.2.5:    8.2 MB  world.tar.xz
+foo 1 366.0kB
+hello 2 8.7MB
 ```
+
+This shows that there is one version of artifact `foo` and 2 versions of artifact `hello`.
+The size at the end is the total size of all artifacts of a given name.
+
+You may also list all version of one artifact using the following command
+
+```
+arti ls minio/test -n hello
+```
+
+Output:
+
+```
+1.2.5   8.2 MB world.tar.xz
+1.2.4 472.1 kB world.tar.xz
+```
+
+It is also possible to define version ranges:
+
+```
+arti ls minio/test -v ">=1.0.0 <2.0.0"
+```
+
+of course combining these two filters is also possible
+
+```
+arti ls minio/test -n hello -v "1.2.4"
+```
+
+Output:
+
+```
+1.2.4 472.1 kB world.tar.xz
+```
+
+For full syntax of version ranges please see this [documentation](https://github.com/blang/semver).
 
 
 ### Deleting artefacts

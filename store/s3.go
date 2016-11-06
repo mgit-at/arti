@@ -25,6 +25,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/blang/semver"
 	"github.com/minio/minio-go"
 	"github.com/spf13/viper"
 )
@@ -79,7 +80,7 @@ func NewS3Store(cfg *viper.Viper, path string) (Store, error) {
 	return Store(s), nil
 }
 
-func (s *S3Store) List(name string) (list ArtifactList, err error) {
+func (s *S3Store) List(name string, versions semver.Range) (list ArtifactList, err error) {
 	list = make(ArtifactList)
 
 	doneCh := make(chan struct{})
@@ -102,10 +103,15 @@ func (s *S3Store) List(name string) (list ArtifactList, err error) {
 		n, v := path.Split(strings.TrimSuffix(nv, "/"))
 		n = strings.TrimSuffix(n, "/")
 		if a, err := MakeArtifactVersion(v, f, obj.Size); err == nil {
-			list[n] = append(list[n], a)
-		} else {
-			log.Printf("ignoring invalid object: '%s'", obj.Key) // TODO: debug output
+			if versions != nil {
+				if versions(a.Version) {
+					list[n] = append(list[n], a)
+				}
+			} else {
+				list[n] = append(list[n], a)
+			}
 		}
+		// ignoring files outside of scheme
 	}
 
 	return
