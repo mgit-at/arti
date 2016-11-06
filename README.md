@@ -20,7 +20,7 @@ The checksum file will be generated on upload and checked when downloading.
 This file contains a algorithm specifier and the hash value seperated by a `:`.
 
 
-For now the only supported checksum algorightm is SHA-256 which uses the identifier `sha256`
+For now the only supported checksum algorithm is SHA-256 which uses the identifier `sha256`
 and the hex-encoded hash value:
 
 ```
@@ -33,9 +33,22 @@ sha256:hex(SHA256(<file>))
 
 `arti` uses [cobra](https://github.com/spf13/cobra)/[viper](https://github.com/spf13/viper) for
 command-line/config file handling. You may configure `arti` stores using a simple config file
-format, see [this file](sample-config.toml) for an example.
-By default `arti` looks for the file `$HOME/.arti.toml` but you may override this using the `-c`
-option. Besides toml you may use json or yaml as a config file format.
+format:
+
+```
+stores:
+  minio:
+    type: "S3"
+    endpoint: "127.0.0.1:9000"
+    access-key-id: "my-minio-username"
+    secret-access-key: ""
+    location: "us-east-1"
+```
+
+Fore more examples see [this file](sample-config.yaml) [or this](sample-config.toml). By default
+`arti` looks for the file `$HOME/.arti.(yaml|toml)` but you may override this using the `-c` option.
+Besides YAML and TOML you may use JSON and some other syntax. For a full list please read the
+[viper documentation](https://github.com/spf13/viper).
 
 Any config option may be overridden using environment variables. Environment variable names start
 with the prefix `ARTI_` followed by the key name of the config option where all `.` are replaced
