@@ -17,6 +17,7 @@ package cmd
 import (
 	"log"
 	"os"
+	"sort"
 
 	"github.com/spf13/cobra"
 )
@@ -59,7 +60,15 @@ func listRun(cmd *cobra.Command, args []string) {
 		log.Fatalln("listing artifacts failed:", err)
 	}
 
-	for name, versions := range artifacts {
+	names := []string{}
+	for name := range artifacts {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		versions := artifacts[name]
+		sort.Sort(sort.Reverse(versions))
+
 		log.Printf("%s:", name)
 		for _, v := range versions {
 			if numericSize {

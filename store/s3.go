@@ -97,7 +97,7 @@ func (s *S3Store) List() (list ArtifactList, err error) {
 		nv, f := path.Split(obj.Key)
 		n, v := path.Split(strings.TrimSuffix(nv, "/"))
 		n = strings.TrimSuffix(n, "/")
-		if a, err := MakeArtifactListEntry(v, f, obj.Size); err == nil {
+		if a, err := MakeArtifactVersion(v, f, obj.Size); err == nil {
 			list[n] = append(list[n], a)
 		} else {
 			log.Printf("ignoring invalid object: '%s'", obj.Key) // TODO: debug output

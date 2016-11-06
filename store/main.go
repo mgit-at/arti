@@ -42,23 +42,37 @@ func MakeArtifact(name, version string) (Artifact, error) {
 	return a, nil
 }
 
-type ArtifactListEntry struct {
+type ArtifactVersion struct {
 	Version  semver.Version
 	Filename string
 	Filesize int64
 }
 
-func MakeArtifactListEntry(version, filename string, filesize int64) (ArtifactListEntry, error) {
-	a := ArtifactListEntry{Filename: filename, Filesize: filesize}
+func MakeArtifactVersion(version, filename string, filesize int64) (ArtifactVersion, error) {
+	a := ArtifactVersion{Filename: filename, Filesize: filesize}
 	v, err := semver.ParseTolerant(version)
 	if err != nil {
-		return ArtifactListEntry{}, fmt.Errorf("invalid version string: %v", err)
+		return ArtifactVersion{}, fmt.Errorf("invalid version string: %v", err)
 	}
 	a.Version = v
 	return a, nil
 }
 
-type ArtifactList map[string][]ArtifactListEntry
+type ArtifactVersions []ArtifactVersion
+
+func (a ArtifactVersions) Len() int {
+	return len(a)
+}
+
+func (a ArtifactVersions) Less(i, j int) bool {
+	return a[i].Version.LT(a[j].Version)
+}
+
+func (a ArtifactVersions) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+
+type ArtifactList map[string]ArtifactVersions
 
 type Store interface {
 	List() (ArtifactList, error)
