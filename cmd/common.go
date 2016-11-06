@@ -53,9 +53,6 @@ func selectStore(nameAndPath string) store.Store {
 		log.Fatalln("no such store:", np[0])
 	}
 
-	tmp := viper.Get("stores.minio.location-asdf")
-	log.Println("%s", tmp)
-
 	cfg.SetEnvPrefix("arti_stores__" + np[0] + "_")
 	cfg.SetEnvKeyReplacer(strings.NewReplacer(".", "__", "-", "_"))
 	cfg.AutomaticEnv()
