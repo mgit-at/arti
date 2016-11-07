@@ -169,6 +169,8 @@ func (s *S3Store) Put(artifact Artifact, filename string) error {
 		return fmt.Errorf("artifact already exists")
 	}
 
+	csumCH := calcCSum(filename)
+
 	basename := filepath.Base(filename)
 	p := path.Join(artifact.Name, artifact.Version.String(), basename)
 	n, err := s.client.FPutObject(s.bucket, p, filename, "application/octet-stream")
@@ -176,17 +178,17 @@ func (s *S3Store) Put(artifact Artifact, filename string) error {
 		return fmt.Errorf("Error uploading file '%s': %v", basename, err)
 	}
 
-	hashSum, err := calcCSum(filename)
-	if err != nil {
-		return fmt.Errorf("Error calculating checksum of '%s': %v", basename, err)
+	csum := <-csumCH
+	if csum.err != nil {
+		return fmt.Errorf("Error calculating checksum of '%s': %v", basename, csum.err)
 	}
-	_, err = s.client.PutObject(s.bucket, p+CSumExt, strings.NewReader(hashSum), "application/octet-stream")
+	_, err = s.client.PutObject(s.bucket, p+CSumExt, strings.NewReader(csum.hash), "application/octet-stream")
 	if err != nil {
 		return fmt.Errorf("Error uploading hash: %v", err)
 	}
 
 	log.Printf("successfully uploaded %d Bytes to '%s:/%s'", n, s.bucket, p)
-	log.Printf("%s", hashSum)
+	log.Printf("%s", csum.hash)
 
 	return nil
 }

@@ -16,6 +16,7 @@ package store
 
 import (
 	"crypto/sha256"
+	"crypto/subtle"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -63,15 +64,36 @@ func calcSHA256(filename string) (string, error) {
 
 func checkSHA256(filename, toCompare string) (bool, error) {
 	hashSum, err := calcSHA256(filename)
-	return hashSum == toCompare, err
+	if err != nil {
+		return false, err
+	}
+	return subtle.ConstantTimeCompare([]byte(hashSum), []byte(toCompare)) == 1, nil
 }
 
-func calcCSum(filename string) (string, error) {
-	cs, err := CSumAlgos[CSumAlgoDefault].calc(filename)
-	if err != nil {
-		return "", err
-	}
-	return strings.Join([]string{CSumAlgoDefault, cs}, CSumAlgoSeperator), nil
+type CSumResult struct {
+	hash string
+	err  error
+}
+
+func calcCSum(filename string) <-chan CSumResult {
+	c := make(chan CSumResult)
+
+	go func() {
+		res := CSumResult{"", nil}
+		defer func() {
+			c <- res
+		}()
+
+		cs, err := CSumAlgos[CSumAlgoDefault].calc(filename)
+		if err != nil {
+			res.err = err
+			return
+		}
+		res.hash = strings.Join([]string{CSumAlgoDefault, cs}, CSumAlgoSeperator)
+		return
+	}()
+
+	return c
 }
 
 func checkCSum(filename, toCompare string) (bool, error) {
