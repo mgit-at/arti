@@ -1,4 +1,6 @@
 package: github.com/mgit-at/arti
 import:
 - package: github.com/spf13/cobra
+  subpackages:
+  - doc
 - package: github.com/spf13/viper

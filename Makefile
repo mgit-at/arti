@@ -24,4 +24,7 @@ clean:
 update:
 	glide update -u -s -v --cache
 
-.PHONY: bin clean update
+manpage:
+	@cd manpage/ &&	go build && ./manpage
+
+.PHONY: bin clean update manpage deb

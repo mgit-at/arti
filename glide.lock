@@ -1,12 +1,16 @@
-hash: ef45aef890e28ae9ba2b1ae01457ed5c77a90710583bc6f265584d902e583c28
-updated: 2016-10-31T11:05:48.963299635+01:00
+hash: 3d6ed7a74e99866b8e7aa1978f538f43a5825d41d891924dd219d100e0ce71ab
+updated: 2016-11-07T13:03:00.898765803+01:00
 imports:
 - name: github.com/blang/semver
   version: 60ec3488bfea7cca02b021d106d9911120d25fe9
+- name: github.com/cpuguy83/go-md2man
+  version: a65d4d2de4d5f7c74868dfa9b202a3c8be315aaa
+  subpackages:
+  - md2man
 - name: github.com/fsnotify/fsnotify
   version: fd9ec7deca8bf46ecd2a795baaacf2b3a9be1197
 - name: github.com/hashicorp/hcl
-  version: 8fa153c5b4e9d1ccecda7075821ffc7c1f6d912b
+  version: f74cf8281543a0797d7b4ab7d88e76e7ba125308
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -23,7 +27,7 @@ imports:
 - name: github.com/magiconair/properties
   version: 0723e352fa358f9322c938cc2dadda874e9151a9
 - name: github.com/minio/minio-go
-  version: 501fc44b17efc3db21c268f9e1035a50983b16e2
+  version: 88cd2fcfc8f7dad4c586918348e986cf6095bfad
   subpackages:
   - pkg/policy
   - pkg/set
@@ -37,6 +41,10 @@ imports:
   version: 248dadf4e9068a0b3e79f02ed0a610d935de5302
 - name: github.com/pkg/sftp
   version: 4d0e916071f68db74f8a73926335f809396d6b42
+- name: github.com/russross/blackfriday
+  version: 5f33e7b7878355cd2b7e6b8eefc48a5472c69f70
+- name: github.com/shurcooL/sanitized_anchor_name
+  version: 1dba4b3954bc059efc3991ec364f9f9a35f597d2
 - name: github.com/spf13/afero
   version: 52e4a6cfac46163658bd4f123c49b6ee7dc75f78
   subpackages:
@@ -46,6 +54,8 @@ imports:
   version: 2580bc98dc0e62908119e4737030cc2fdfc45e4c
 - name: github.com/spf13/cobra
   version: 6e91dded25d73176bf7f60b40dd7aa1f0bf9be8d
+  subpackages:
+  - doc
 - name: github.com/spf13/jwalterweatherman
   version: 33c24e77fb80341fe7130ee7c594256ff08ccc46
 - name: github.com/spf13/pflag
@@ -53,7 +63,7 @@ imports:
 - name: github.com/spf13/viper
   version: 651d9d916abc3c3d6a91a12549495caba5edffd2
 - name: golang.org/x/crypto
-  version: b2fa06b6af4b7c9bfeb8569ab7b17f04550717bf
+  version: 9477e0b78b9ac3d0b03822fd95422e2fe07627cd
   subpackages:
   - curve25519
   - ed25519
