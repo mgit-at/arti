@@ -81,7 +81,7 @@ arti upload minio/test -n foo -v 1.2.3 foo-1.2.3.tar.gz
 Output:
 ```
 successfully uploaded 374774 Bytes to 'test:/foo/1.2.3/foo-1.2.3.tar.gz'
-SHA256: k4odDkqLqMvpPdlU75K3wFWVCOxPoI9AyaL4o8dra+8=
+sha256:dda436a6ea260e6bf6655688f8f8da34cde6751d4fa720732766868b90858f1d
 ```
 
 Version numbers must follow the semantic versioning scheme but checks are relaxed. Missing
@@ -96,7 +96,7 @@ Output
 
 ```
 successfully uploaded 374774 Bytes to 'bar:/foo/1.0.0/my-artefact.zip'
-SHA256: k4odDkqLqMvpPdlU75K3wFWVCOxPoI9AyaL4o8dra+8=
+sha256:446104b3abefda73b1255e5197702acbeb36b3aada251ad39e1e5ab55292683b
 ```
 
 
