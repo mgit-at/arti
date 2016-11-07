@@ -20,11 +20,16 @@ bin:
 
 clean:
 	rm -f arti
+	rm -f manpage/manpage
+	rm -f manpage/*.3
 
 update:
 	glide update -u -s -v --cache
 
 manpage:
 	@cd manpage/ &&	go build && ./manpage
+
+deb: bin manpage
+	eatmydata debuild -I -us -uc
 
 .PHONY: bin clean update manpage deb

@@ -1,2 +1,8 @@
 /arti
+/manpage/manpage
 /manpage/*.3
+/debian/arti.debhelper.log
+/debian/arti.substvars
+/debian/arti/
+/debian/debhelper-build-stamp
+/debian/files

@@ -1,0 +1,16 @@
+Source: arti
+Maintainer: Christian Pointner <cpointner@mgit.at>
+Build-Depends: debhelper (>= 9.0.0)
+Standards-Version: 3.9.7
+Priority: extra
+Section: admin
+
+Package: arti
+Priority: extra
+Architecture: amd64
+Depends: ${misc:Depends}
+Description: simple cloud storage artifact uploader
+ arti is a simple tool to upload/download/manage artifacts to/from a cloud
+ storage provider such as S3. It is a more general approach to what deb-s3
+ does. Although arti is intended to support multiple storage backends only
+ S3 is supported for now.
